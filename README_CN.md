@@ -3,6 +3,9 @@
 # 简介
 本项目提供一键构建 SpacemiT K1 Debian 13 镜像的脚本，镜像开箱即用。目前支持构建 GNOME、XFCE和Minimal 镜像。
 
+> ❗ ❗ ❗ **注意：当前main分支仅适用于Spacemit K1平台，如果要适配Spacemit K3平台，请切换到`k3-main`分支**
+
+
 # GNOME 镜像
 
 
