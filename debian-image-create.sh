@@ -21,13 +21,13 @@
 
 set -e
 
-TARGET_ROOTFS=./debian-13-rootfs-desktop-k1
-HOST_NAME=k1
+TARGET_ROOTFS=./debian-13-rootfs-desktop-k3
+HOST_NAME=k3
 DEBIAN_MIRROR=http://deb.debian.org/debian
-MINBASE_TAR=debian-13-rootfs-desktop-k1.tar.gz
+MINBASE_TAR=debian-13-rootfs-desktop-k3.tar.gz
 # Get current date and time as version number
 CURRENT_DATETIME=$(date +%Y%m%d%H%M)
-FIRMWARE_NAME="debian-13"
+FIRMWARE_NAME="Debian-13"
 CONFIG_DIR=./config
 
 # Parameter processing
@@ -91,7 +91,7 @@ umount_filesystem() {
 clean_build() {
     inf "=== Cleaning old artifacts ==="
     umount_filesystem $TARGET_ROOTFS
-    find . -maxdepth 1 ! -name '.' ! -name "$MINBASE_TAR" ! -name "$(basename $0)" ! -name "config" ! -name "*.zip" ! -name "*.img.zip" -exec rm -rf {} +
+    find . -maxdepth 1 ! -name '.' ! -name "$MINBASE_TAR" ! -name "$(basename $0)" ! -name "config" ! -name "*.zip" ! -name "*.img.zip" ! -name "*.tar.gz" ! -name "*.img.gz" -exec rm -rf {} +
 }
 
 check_and_extract_minbase() {
@@ -157,8 +157,8 @@ EOF
     # bianbu repository
     cat > $TARGET_ROOTFS/etc/apt/sources.list.d/bianbu.sources <<EOF
 Types: deb deb-src
-URIs: http://archive.spacemit.com/debian/
-Suites: trixie
+URIs: http://archive.bianbu.xyz/debian/
+Suites: trixie-k3
 Components: main
 Signed-By: /usr/share/keyrings/bianbu-archive-keyring.gpg
 EOF
@@ -166,7 +166,7 @@ EOF
     # apt priority
     cat > $TARGET_ROOTFS/etc/apt/preferences.d/bianbu <<EOF
 Package: *
-Pin: release o=Spacemit, n=trixie
+Pin: release o=Spacemit, n=trixie-k3
 Pin-Priority: 1100
 EOF
 
@@ -176,8 +176,8 @@ EOF
     chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install initramfs-tools fdisk e2fsprogs"
 
     # bootloader and bianbu software
-    chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install u-boot-spacemit opensbi-spacemit bianbu-esos linux-generic linux-tools-6.6.63"
-    chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install img-gpu-powervr k1x-vpu-firmware k1x-cam spacemit-uart-bt spacemit-modules-usrload spacemit-flash-dtbs"
+    chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install u-boot-spacemit opensbi-spacemit bianbu-esos linux-generic"
+    chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install img-gpu-powervr k3x-vpu-firmware linux-firmware-spacemit spacemit-flash-dtbs"
 
     cp $CONFIG_DIR/bianbu.bmp $TARGET_ROOTFS/boot/bianbu.bmp
 }
@@ -185,7 +185,7 @@ EOF
 install_desktop() {
     local firmware_type="$1"
 
-    if [ "$firmware_type" = "desktop" ]; then
+    if [ "$firmware_type" = "GNOME" ]; then
         inf "=== Installing GNOME desktop ==="
         chroot $TARGET_ROOTFS /bin/bash -c '
         echo "keyboard-configuration  keyboard-configuration/xkb-model select pc105" | debconf-set-selections
@@ -200,7 +200,7 @@ install_desktop() {
         chroot $TARGET_ROOTFS /bin/bash -c "tasksel install desktop gnome-desktop"
         chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive systemctl set-default graphical.target"
         chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install gnome-initial-setup"
-    elif [ "$firmware_type" = "xfce" ]; then
+    elif [ "$firmware_type" = "XFCE" ]; then
         inf "=== Installing XFCE desktop ==="
         chroot $TARGET_ROOTFS /bin/bash -c "apt-get update"
         chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install task-xfce-desktop"
@@ -217,13 +217,15 @@ install_desktop() {
 install_common_packages() {
     local firmware_type="$1"
 
-    if [ "$firmware_type" = "minimal" ]; then
+    if [ "$firmware_type" = "Minimal" ]; then
         chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install systemd systemd-sysv vim iproute2 dbus"
-    elif [ "$firmware_type" = "desktop" ]; then
-        chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install chromium-browser-stable mpp vim ssh iproute2 v4l-utils"
-    elif [ "$firmware_type" = "xfce" ]; then
-        chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install mpp vim ssh iproute2 v4l-utils"
+    elif [ "$firmware_type" = "GNOME" ]; then
+        chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install chromium mpp vim ssh iproute2 v4l-utils mpv ffmpeg fcitx5-autostart"
+    elif [ "$firmware_type" = "XFCE" ]; then
+        chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install mpp vim ssh iproute2 v4l-utils mpv ffmpeg"
     fi
+
+    chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install tcpdump ethtool net-tools iw isc-dhcp-client mtr-tiny dnsutils rng-tools5 rfkill"
 }
 
 apply_common_config() {
@@ -231,7 +233,7 @@ apply_common_config() {
     inf "=== Common configuration ==="
     inf "reconfiguring locales"
 
-    if [ "$firmware_type" = "minimal" ]; then
+    if [ "$firmware_type" = "Minimal" ]; then
         chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install locales"
     else
         chroot $TARGET_ROOTFS /bin/bash -c "DEBIAN_FRONTEND=noninteractive apt-get -y install locales task-chinese-s task-chinese-s-desktop"
@@ -251,11 +253,26 @@ apply_common_config() {
     inf "changing root password"
     chroot $TARGET_ROOTFS /bin/bash -c "echo root:bianbu | chpasswd"
 
-    if [ "$firmware_type" = "xfce" ]; then
+    if [ "$firmware_type" = "XFCE" ]; then
         # Create regular user
         chroot $TARGET_ROOTFS /bin/bash -c "useradd -m -s /bin/bash user"
         chroot $TARGET_ROOTFS /bin/bash -c "echo user:bianbu | chpasswd"
         chroot $TARGET_ROOTFS /bin/bash -c "usermod -aG sudo user"
+        # Software rendering for XFCE
+        echo "LIBGL_ALWAYS_SOFTWARE=1" >> $TARGET_ROOTFS/etc/environment
+        cat > $TARGET_ROOTFS/etc/X11/xorg.conf.d/10-spacemit-display.conf << EOF
+Section "Device"
+    Identifier  "Display-Controller"
+    Driver      "modesetting"
+    Option      "kmsdev" "/dev/dri/card2"
+EndSection
+
+Section "Screen"
+    Identifier "MainScreen"
+    Device     "Display-Controller"
+    DefaultDepth 24
+EndSection
+EOF
     fi
 
     # Time server
@@ -264,6 +281,14 @@ apply_common_config() {
     # Restore DNS
     chroot $TARGET_ROOTFS /bin/bash -c 'echo "nameserver 127.0.0.53" > /etc/resolv.conf'
 
+}
+
+generate_esp_images() {
+    inf "Generating ESP image"
+    dd if=/dev/zero of=esp.vfat bs=1M count=256
+    mkfs.vfat -S 4096 -F 16 -n "ESP" esp.vfat
+
+    fsck.fat -v -n esp.vfat
 }
 
 generate_ext4_images() {
@@ -281,7 +306,7 @@ EOF
     mv $TARGET_ROOTFS/boot/* bootfs
 
     mke2fs -d bootfs -L bootfs -t ext4 -U $UUID_BOOTFS bootfs.ext4 256M
-    if [ "$firmware_type" = "minimal" ]; then
+    if [ "$firmware_type" = "Minimal" ]; then
         mke2fs -d $TARGET_ROOTFS -L rootfs -t ext4 -N 524288 -U $UUID_ROOTFS rootfs.ext4 2048M
     else
         mke2fs -d $TARGET_ROOTFS -L rootfs -t ext4 -N 524288 -U $UUID_ROOTFS rootfs.ext4 8192M
@@ -298,7 +323,7 @@ install_dependencies() {
     local image_type="$1"
     if [ "$image_type" = "titan" ]; then
         if ! command -v zip >/dev/null 2>&1; then
-            apt-get -y install zip
+            apt-get -y install zip tar gzip pigz
         fi
     elif [ "$image_type" = "sdcard" ]; then
         local need_install=""
@@ -317,20 +342,20 @@ prepare_common_files() {
     mkdir -p $TMP/factory/
 
     # Copy related files
-    cp $TARGET_ROOTFS/usr/lib/u-boot/spacemit/bootinfo_emmc.bin $TMP/factory
-    cp $TARGET_ROOTFS/usr/lib/u-boot/spacemit/bootinfo_sd.bin $TMP/factory
-    cp $TARGET_ROOTFS/usr/lib/u-boot/spacemit/bootinfo_spinand.bin $TMP/factory
-    cp $TARGET_ROOTFS/usr/lib/u-boot/spacemit/bootinfo_spinor.bin $TMP/factory
-    cp $TARGET_ROOTFS/usr/lib/u-boot/spacemit/FSBL.bin $TMP/factory
+    cp $TARGET_ROOTFS/usr/lib/u-boot/spacemit/bootinfo_*.bin $TMP/factory/
+    cp $TARGET_ROOTFS/usr/lib/u-boot/spacemit/FSBL.bin $TMP/factory/
     cp $TARGET_ROOTFS/usr/lib/u-boot/spacemit/u-boot.itb $TMP
     cp $TARGET_ROOTFS/usr/lib/u-boot/spacemit/env.bin $TMP
     cp $TARGET_ROOTFS/usr/lib/riscv64-linux-gnu/opensbi/generic/fw_dynamic.itb $TMP
+    cp $TARGET_ROOTFS/usr/lib/riscv64-linux-gnu/esos/esos.itb $TMP
     cp bootfs.ext4 $TMP
     cp rootfs.ext4 $TMP
+    cp esp.vfat $TMP
 
     # get common partition table
     # wget -P $TMP https://gitee.com/bianbu/image-config/raw/main/partition_universal.json
-    cp $CONFIG_DIR/partition_universal.json $TMP
+    cp $CONFIG_DIR/* $TMP
+
 }
 
 make_titan_image() {
@@ -343,15 +368,12 @@ make_titan_image() {
     # wget -P $TMP https://gitee.com/bianbu/image-config/raw/main/fastboot.yaml
     # wget -P $TMP https://gitee.com/bianbu/image-config/raw/main/partition_2M.json
     # wget -P $TMP https://gitee.com/bianbu/image-config/raw/main/partition_flash.json
-    cp $CONFIG_DIR/fastboot.yaml $TMP
-    cp $CONFIG_DIR/partition_2M.json $TMP
-    cp $CONFIG_DIR/partition_flash.json $TMP
 
     # Package
     pushd $TMP >/dev/null
-    zip -r ../$FIRMWARE_NAME.zip *
+    tar -cf - . | pigz > ../$FIRMWARE_NAME.tar.gz
     popd >/dev/null || return
-    inf "Titan image generated: $FIRMWARE_NAME.zip"
+    inf "Titan image generated: $FIRMWARE_NAME.tar.gz"
 }
 
 make_sdcard_image() {
@@ -362,8 +384,8 @@ make_sdcard_image() {
 
     # get and generate genimage.cfg
     #wget -P $TMP https://gitee.com/bianbu-linux/scripts/raw/bl-v1.0.y/gen_imgcfg.py
-    cp $CONFIG_DIR/gen_imgcfg.py $TMP
-    python3 $TMP/gen_imgcfg.py -i $TMP/partition_universal.json -n sdcard.img -o $TMP/genimage.cfg
+
+    python3 $CONFIG_DIR/gen_imgcfg.py $CONFIG_DIR/partition_universal.json $TMP
 
     # Generate SDCard image
     ROOTPATH_TMP="$(mktemp -d)"
@@ -376,11 +398,11 @@ make_sdcard_image() {
         --outputpath "."
 
     mv sdcard.img $TMP.img
-    zip $FIRMWARE_NAME.img.zip $TMP.img
-    # Delete temporary directories and files generated during .img.zip creation
+    gzip -c $TMP.img > $FIRMWARE_NAME.img.gz
+    # Delete temporary directories and files generated during .img.gz creation
     rm -rf $ROOTPATH_TMP $GENIMAGE_TMP $TMP.img
 
-    inf "SDCard image generated: $FIRMWARE_NAME.img.zip"
+    inf "SDCard image generated: $FIRMWARE_NAME.img.gz"
 }
 
 make_image() {
@@ -404,26 +426,26 @@ main() {
     check_and_install_dependencies
 
     case "$build_type" in
-        "minimal")
-            inf "=== Building minimal firmware only ==="
+        "Minimal")
+            inf "=== Building Minimal firmware only ==="
             build_minimal_firmware
             ;;
-        "desktop")
+        "GNOME")
             inf "=== Building GNOME desktop firmware only ==="
             build_desktop_firmware
             ;;
-        "xfce")
+        "XFCE")
             inf "=== Building XFCE desktop firmware only ==="
             build_xfce_firmware
             ;;
         "all")
-            inf "=== Building minimal, desktop and xfce firmware ==="
+            inf "=== Building Minimal, GNOME and XFCE firmware ==="
             build_minimal_firmware
             build_desktop_firmware
             build_xfce_firmware
             ;;
         *)
-            err "Invalid argument. Use: minimal, desktop, xfce or no argument for all."
+            err "Invalid argument. Use: Minimal, GNOME, XFCE or no argument for all."
             ;;
     esac
 
@@ -432,7 +454,7 @@ main() {
 
 build_firmware() {
     local firmware_type="$1"
-    local current_firmware_name="${FIRMWARE_NAME}-${firmware_type}-k1-${CURRENT_DATETIME}"
+    local current_firmware_name="${FIRMWARE_NAME}-${firmware_type}-K3-${CURRENT_DATETIME}"
 
     inf "=== Building ${firmware_type} firmware ==="
     inf "Firmware name: ${current_firmware_name}"
@@ -447,7 +469,7 @@ build_firmware() {
     mount_filesystem $TARGET_ROOTFS
 
     # Install packages based on firmware type
-    if [ "$firmware_type" != "minimal" ]; then
+    if [ "$firmware_type" != "Minimal" ]; then
         install_desktop "$firmware_type"
     fi
 
@@ -463,6 +485,8 @@ build_firmware() {
 
     generate_ext4_images "$firmware_type"
 
+    generate_esp_images "$firmware_type"
+
     local original_firmware_name="$FIRMWARE_NAME"
     FIRMWARE_NAME="$current_firmware_name"
 
@@ -474,15 +498,15 @@ build_firmware() {
 }
 
 build_minimal_firmware() {
-    build_firmware "minimal"
+    build_firmware "Minimal"
 }
 
 build_desktop_firmware() {
-    build_firmware "desktop"
+    build_firmware "GNOME"
 }
 
 build_xfce_firmware() {
-    build_firmware "xfce"
+    build_firmware "XFCE"
 }
 
 main "$@"
