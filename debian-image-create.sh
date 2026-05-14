@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-# Debian 13 (trixie) gnome desktop build script for SpacemiT RISC-V
+# Debian 13 (trixie) image build script for SpacemiT RISC-V
 #
 # Features:
 #   1. Bootstrap Debian RISC-V root filesystem
@@ -12,9 +12,9 @@
 #
 # Usage:
 #   sudo ./debian-image-create.sh
-#   or sudo ./debian-image-create.sh minimal
-#   or sudo ./debian-image-create.sh desktop
-#   or sudo ./debian-image-create.sh xfce
+#   or sudo ./debian-image-create.sh Minimal
+#   or sudo ./debian-image-create.sh GNOME
+#   or sudo ./debian-image-create.sh XFCE
 # Requirements:
 #   - debootstrap, qemu-user-static, wget, tar, genimage, zip, python3
 #
