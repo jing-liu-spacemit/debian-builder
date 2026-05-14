@@ -3,6 +3,8 @@
 # Introduction
 This project provides a one-click script to build SpacemiT K1 Debian 13 images that are ready to use out of the box. Currently supports building GNOME, XFCE and Minimal images.
 
+> ❗ ❗ ❗ **Note: The current main branch is only applicable to the Spacemit K1 platform. To support the Spacemit K3 platform, please switch to the `k3-main` branch.**
+
 # GNOME Image
 
 
