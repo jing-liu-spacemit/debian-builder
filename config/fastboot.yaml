@@ -19,7 +19,6 @@ actions: # 刷机操作的定义
         seconds: 1
   - getvar:
       args: 'version'
-      set: 'version'
       skip_fail: true
       timeout:
         seconds: 1
