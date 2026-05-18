@@ -6,7 +6,8 @@ This project provides a one-click script to build SpacemiT K3 Debian 13 images t
 # GNOME Image
 
 
-https://github.com/user-attachments/assets/53808a85-537f-4502-a669-539c963ae0e9
+<img width="1920" height="1080" alt="GNOME" src="https://github.com/user-attachments/assets/eb399d65-6ffe-4788-9e86-f1724edda2a4" />
+
 
 
 ## Features
@@ -24,7 +25,8 @@ https://github.com/user-attachments/assets/53808a85-537f-4502-a669-539c963ae0e9
 # XFCE Image
 
 
-https://github.com/user-attachments/assets/74c713ce-ddd6-481e-bc52-27d0fdc78ed1
+<img width="1920" height="1080" alt="XFCE" src="https://github.com/user-attachments/assets/4ca69197-89c1-4772-89e1-b0874bffeca2" />
+
 
 
 ## Features
