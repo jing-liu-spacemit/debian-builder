@@ -157,7 +157,7 @@ EOF
     # bianbu repository
     cat > $TARGET_ROOTFS/etc/apt/sources.list.d/bianbu.sources <<EOF
 Types: deb deb-src
-URIs: http://archive.bianbu.xyz/debian/
+URIs: http://archive.spacemit.com/debian/
 Suites: trixie-k3
 Components: main
 Signed-By: /usr/share/keyrings/bianbu-archive-keyring.gpg
