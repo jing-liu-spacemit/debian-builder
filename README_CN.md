@@ -1,7 +1,7 @@
 [English](./README.md)
 
 # 简介
-本项目提供一键构建 SpacemiT K1 Debian 13 镜像的脚本，镜像开箱即用。目前支持构建 GNOME、XFCE和Minimal 镜像。
+本项目提供一键构建 SpacemiT K3 Debian 13 镜像的脚本，镜像开箱即用。目前支持构建 GNOME、XFCE和Minimal 镜像。
 
 # GNOME 镜像
 
@@ -13,14 +13,13 @@ https://github.com/user-attachments/assets/53808a85-537f-4502-a669-539c963ae0e9
 - 预装原生 GNOME 桌面，支持GPU
 - 预装 Chromium 浏览器，支持视频硬件解码
 - 预装常见工具包：vim、ssh、iproute2、wget
-- 预置 [SpacemiT K1 debian 软件源](http://archive.spacemit.com/debian/)
+- 预置 [SpacemiT K3 debian 软件源](http://archive.spacemit.com/debian/)
 - 支持 Wi-Fi、Ethernet
 
 ## 尚未适配的功能
-- FFmpeg、GStreamer框架
+- GStreamer框架
 - 视频应用
 - 相机应用
-- 串口蓝牙，例如 rtl8852bs
 
 # XFCE 镜像
 
@@ -31,39 +30,33 @@ https://github.com/user-attachments/assets/74c713ce-ddd6-481e-bc52-27d0fdc78ed1
 ## 特性
 - 预装原生 XFCE 桌面（暂不支持GPU）
 - 预装常见工具包：vim、ssh、iproute2、wget
-- 预置 [SpacemiT K1 debian 软件源](http://archive.spacemit.com/debian/)
+- 预置 [SpacemiT K3 debian 软件源](http://archive.spacemit.com/debian/)
 - 支持 Wi-Fi、Ethernet
 
 ## 尚未适配的功能
-- FFmpeg、GStreamer框架
+- GStreamer框架
 - 视频应用
 - 相机应用
-- 串口蓝牙，例如 rtl8852bs
 
 # 支持的硬件
-- MUSE Pi pro
-- MUSE Book
-- BPI-F3
-- Milk-V Jupiter (Not Tested)
-- LicheePi 3A (Not Tested)
+- K3-Pico-ITX
+- K3-Com260
 
 # 镜像下载
-- 官方：[链接](https://archive.spacemit.com/image/k1/version/debian/)
-- 百度云盘：[链接](https://pan.baidu.com/s/1nbe5FYEtilqTcBHfFoM-Nw?pwd=vezm) （提取码: vezm） 
-- Google Drive：[链接](https://drive.google.com/drive/folders/143Ii9l68V9_X_Ryny84wsqLKmpDQ9LnX?usp=sharin)
+- 官方：[链接](https://archive.spacemit.com/image/k3/version/debian/)
 
 # 刷机
 - sdcard raw 镜像
 
-  以 *.img.zip 结尾，可以用[balenaEtcher](https://etcher.balena.io/)写入 sdcard，或者解压后用 dd 命令写入 sdcard。
+  以 `.img.gz` 结尾，解压后可以用[balenaEtcher](https://etcher.balena.io/)写入 sdcard，或者解压后用 dd 命令写入 sdcard。
 
 - 自定义镜像
 
-  以 .zip 结尾，可以用 Titan Flasher 刷机，或者解压后用 fastboot 刷机。
+  以 `.tar.gz` 结尾，可以用 Titan Flasher 刷机，或者解压后用 fastboot 刷机。
 
 固件`root`用户的密码：`bianbu`
 
-XFCE镜像初始用户名：user，密码：`bianbu`
+XFCE镜像初始用户名：`user`，密码：`bianbu`
 
 Titan Flasher刷机参考[刷机工具使用手册](https://developer.spacemit.com/documentation?token=O6wlwlXcoiBZUikVNh2cczhin5d)。
 
@@ -73,10 +66,23 @@ Titan Flasher刷机参考[刷机工具使用手册](https://developer.spacemit.c
 ## 环境准备
 您需要一个X86的PC，推荐安装Ubuntu LTS版本，例如Ubuntu 24.04。
 
+如果您拥有K3开发板的话，我们更推荐在Bianbu V4.x版本系统上制作。
+
 ## 安装依赖
-制作镜像需要安装qemu，请安装我们推荐的版本，参考[qemu安装指南](https://bianbu.spacemit.com/system_integration/bianbu_3.0_rootfs_create/#qemu)。
+制作镜像需要安装qemu。可以使用我们提供的一键安装脚本（需要有sudo权限）：
+
+```shell
+bash <(wget -qO- https://archive.spacemit.com/qemu/install_qemu_user_riscv64.sh)
+```
 
 ## 镜像制作
+
+先将制作脚本下载到本地：
+
+```
+git clone git@github.com:jing-liu-spacemit/debian-builder.git
+git checkout -b k3-main
+```
 
 您可以运行下面指令来同时制作三种镜像：
 ```bash
@@ -86,17 +92,17 @@ sudo ./debian-image-create.sh
 
 - Minimal
 ```bash
-sudo ./debian-image-create.sh minimal
+sudo ./debian-image-create.sh Minimal
 ```
 
 - GNOME
 ```bash
-sudo ./debian-image-create.sh desktop
+sudo ./debian-image-create.sh GNOME
 ```
 
 - XFCE
 ```bash
-sudo ./debian-image-create.sh xfce
+sudo ./debian-image-create.sh XFCE
 ```
 
 # 问题反馈

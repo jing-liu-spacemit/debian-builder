@@ -1,7 +1,7 @@
 [中文](./README_CN.md)
 
 # Introduction
-This project provides a one-click script to build SpacemiT K1 Debian 13 images that are ready to use out of the box. Currently supports building GNOME, XFCE and Minimal images.
+This project provides a one-click script to build SpacemiT K3 Debian 13 images that are ready to use out of the box. Currently supports building GNOME, XFCE and Minimal images.
 
 # GNOME Image
 
@@ -13,14 +13,13 @@ https://github.com/user-attachments/assets/53808a85-537f-4502-a669-539c963ae0e9
 - Pre-installed native GNOME desktop with GPU support
 - Pre-installed Chromium browser with hardware video decoding support
 - Pre-installed common toolkits: vim, ssh, iproute2, wget
-- Pre-configured [SpacemiT K1 Debian software sources](http://archive.spacemit.com/debian/)
+- Pre-configured [SpacemiT K3 Debian software sources](http://archive.spacemit.com/debian/)
 - Wi-Fi and Ethernet support
 
 ## Features Not Yet Adapted
-- FFmpeg and GStreamer frameworks
+- GStreamer framework
 - Video applications
 - Camera applications
-- Serial Bluetooth, such as rtl8852bs
 
 # XFCE Image
 
@@ -30,41 +29,34 @@ https://github.com/user-attachments/assets/74c713ce-ddd6-481e-bc52-27d0fdc78ed1
 
 ## Features
 - Pre-installed native XFCE desktop (GPU is not supported yet)
-- Pre-installed Chromium browser with hardware video decoding support
 - Pre-installed common toolkits: vim, ssh, iproute2, wget
-- Pre-configured [SpacemiT K1 Debian software sources](http://archive.spacemit.com/debian/)
+- Pre-configured [SpacemiT K3 Debian software sources](http://archive.spacemit.com/debian/)
 - Wi-Fi and Ethernet support
 
 ## Features Not Yet Adapted
-- FFmpeg and GStreamer frameworks
+- GStreamer framework
 - Video applications
 - Camera applications
-- Serial Bluetooth, such as rtl8852bs
 
 # Supported Hardware
-- MUSE Pi pro
-- MUSE Book
-- BPI-F3
-- Milk-V Jupiter (Not Tested)
-- LicheePi 3A (Not Tested)
+- K3-Pico-ITX
+- K3-Com260
 
 # Image Download
-- Official: [Link](https://archive.spacemit.com/image/k1/version/debian/)
-- Baidu Cloud: [Link](https://pan.baidu.com/s/1nbe5FYEtilqTcBHfFoM-Nw?pwd=vezm) (Extraction code: vezm)
-- Google Drive: [Link](https://drive.google.com/drive/folders/143Ii9l68V9_X_Ryny84wsqLKmpDQ9LnX?usp=sharing)
+- Official: [Link](https://archive.spacemit.com/image/k3/version/debian/)
 
 # Flashing
 - SD Card Raw Image
 
-  Files ending with *.img.zip can be written to SD card using [balenaEtcher](https://etcher.balena.io/), or extracted and written using the dd command.
+  Files ending with `.img.gz` can be decompressed and written to SD card using [balenaEtcher](https://etcher.balena.io/), or written using the dd command after decompression.
 
 - Custom Image
 
-  Files ending with .zip can be flashed using Titan Flasher, or extracted and flashed using fastboot.
+  Files ending with `.tar.gz` can be flashed using Titan Flasher, or extracted and flashed using fastboot.
 
 Firmware `root` user password: `bianbu`
 
-XFCE image initial username: user, password: `bianbu`
+XFCE image initial username: `user`, password: `bianbu`
 
 For Titan Flasher flashing, please refer to the [Flashing Tool User Manual](https://developer.spacemit.com/documentation?token=O6wlwlXcoiBZUikVNh2cczhin5d).
 
@@ -74,10 +66,24 @@ If you want to create your own image, you can customize it following the steps b
 ## Environment Preparation
 You need an X86 PC, preferably running Ubuntu LTS version, such as Ubuntu 24.04.
 
+If you have a K3 development board, we recommend building on a Bianbu V4.x system instead.
+
 ## Installing Dependencies
-Image creation requires qemu installation. Please install our recommended version by referring to the [qemu installation guide](https://bianbu.spacemit.com/system_integration/bianbu_3.0_rootfs_create/#qemu).
+Image creation requires qemu. You can use our one-click installation script (requires sudo privileges):
+
+```shell
+bash <(wget -qO- https://archive.spacemit.com/qemu/install_qemu_user_riscv64.sh)
+```
 
 ## Image Creation
+
+First, clone the build script to your local machine:
+
+```
+git clone git@github.com:jing-liu-spacemit/debian-builder.git
+git checkout -b k3-main
+```
+
 You can run the following command to create all three images simultaneously:
 ```bash
 sudo ./debian-image-create.sh
@@ -86,17 +92,17 @@ You can also specify parameters:
 
 - Minimal
 ```bash
-sudo ./debian-image-create.sh minimal
+sudo ./debian-image-create.sh Minimal
 ```
 
 - GNOME
 ```bash
-sudo ./debian-image-create.sh desktop
+sudo ./debian-image-create.sh GNOME
 ```
 
 - XFCE
 ```bash
-sudo ./debian-image-create.sh xfce
+sudo ./debian-image-create.sh XFCE
 ```
 
 # Issue Reporting
