@@ -22,6 +22,20 @@
 set -e
 
 TARGET_ROOTFS=./debian-13-rootfs-desktop-k3
+
+# Cleanup handler: ensure mounted pseudo filesystems are released on any exit
+# (error, Ctrl+C, kill, or normal completion) to avoid leaking mounts.
+cleanup_on_exit() {
+    local exit_code=$?
+    trap - EXIT INT TERM HUP
+    if [ -d "$TARGET_ROOTFS" ]; then
+        echo -e "\033[;33mWarn: script exiting (code=$exit_code), cleaning up mounts under $TARGET_ROOTFS\033[0m" >&2
+        umount_filesystem "$TARGET_ROOTFS" || true
+    fi
+    exit $exit_code
+}
+trap cleanup_on_exit EXIT INT TERM HUP
+
 HOST_NAME=k3
 DEBIAN_MIRROR=http://deb.debian.org/debian
 MINBASE_TAR=debian-13-rootfs-desktop-k3.tar.gz
